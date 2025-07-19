@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 3 Years, My Love!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Hide scrollbars */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0e6f6, #e6f6f0); /* Soft gradient background */
+            font-family: 'Inter', sans-serif;
+            color: #4a4a4a;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            background-color: transparent; /* Canvas background should be transparent */
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1; /* Ensure canvas is behind the text */
+        }
+
+        .message-container {
+            position: relative;
+            z-index: 2; /* Ensure text is above the canvas */
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background for text */
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            margin: 20px;
+            box-sizing: border-box;
+            opacity: 0; /* Initially hidden, fade in with animation */
+            transform: translateY(20px);
+            /* Animation delay will be set dynamically via JavaScript */
+        }
+
+        .message-container h1 {
+            font-size: clamp(1.5rem, 5vw, 3rem); /* Responsive font size */
+            color: #d81b60; /* Deep pink for heading */
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .message-container p {
+            font-size: clamp(1rem, 3vw, 1.5rem); /* Responsive font size */
+            line-height: 1.6;
+            color: #6a1b9a; /* Deep purple for text */
+        }
+
+        @keyframes fadeInMessage {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .message-container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="anniversaryCanvas"></canvas>
+
+    <div class="message-container">
+        <h1>Честити 3 Години любов моя!</h1>
+        <p>Благодаря ти за всеки ден, който ми подаряваш. Благодаря ти за всеки миг, който споделяме.
+Гордея се, че съм с жена като теб — силна, добра и всеотдайна.
+Ти си моята сила, моята опора, моят лъч светлина.
+Благодаря ти за обичта, за грижата, за това че винаги си до мен.
+Обещавам ти, че всеки ден ще давам най-доброто от себе си,
+за да изградим живота, който заслужаваме. </p>
+        <p>With all my love,<br> [Your Name]</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('anniversaryCanvas');
+        const ctx = canvas.getContext('2d');
+        const messageContainer = document.querySelector('.message-container');
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        // Set canvas dimensions
+        canvas.width = width;
+        canvas.height = height;
+
+        const animationDuration = 4000; // 4 seconds for stem growth and blossoming
+        const messageFadeInDelay = (animationDuration / 1000) + 0.5; // Message fades in 0.5 seconds after stems are fully drawn
+        messageContainer.style.animation = `fadeInMessage 2s forwards ${messageFadeInDelay}s`;
+
+
+        // Adjust canvas and message container on window resize
+        window.addEventListener('resize', () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            // Re-initialize stems and flowers on resize
+            initStems();
+        });
+
+        // Flower class (formerly Rose)
+        class Flower {
+            constructor(x, y, initialScale, petalColor, centerColor, rotation) {
+                this.x = x;
+                this.y = y;
+                this.currentScale = initialScale;
+                this.targetScale = Math.min(width, height) * 0.0002; // Responsive flower scale
+                this.petalColor = petalColor;
+                this.centerColor = centerColor;
+                this.bloomSpeed = 0.05; // How fast the flower blooms
+                this.opacity = 0; // Start transparent
+                this.maxOpacity = 1;
+                this.fadeSpeed = 0.03;
+                this.rotation = rotation; // Rotation for the flower
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation); // Apply rotation
+                ctx.globalAlpha = this.opacity; // Apply opacity
+
+                const scale = this.currentScale * 100; // Scale factor for drawing
+
+                // Draw petals (simple bell/cup shape with 3-5 petals)
+                ctx.fillStyle = this.petalColor;
+                ctx.beginPath();
+                // Main body of the flower
+                ctx.ellipse(0, 0, scale * 0.7, scale * 0.9, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Simple petals on top
+                const petalCount = 4; // Adjust for more/fewer petals
+                for (let i = 0; i < petalCount; i++) {
+                    const angle = (Math.PI * 2 / petalCount) * i;
+                    ctx.beginPath();
+                    ctx.ellipse(
+                        Math.cos(angle) * scale * 0.3,
+                        Math.sin(angle) * scale * 0.3,
+                        scale * 0.4,
+                        scale * 0.2,
+                        angle,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+
+
+                // Draw center
+                ctx.fillStyle = this.centerColor;
+                ctx.beginPath();
+                ctx.arc(0, 0, scale * 0.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.globalAlpha = 1; // Reset alpha
+                ctx.restore();
+            }
+
+            update() {
+                // Bloom animation: gradually increase scale
+                if (this.currentScale < this.targetScale) {
+                    this.currentScale += (this.targetScale - this.currentScale) * this.bloomSpeed;
+                    if (this.currentScale > this.targetScale) this.currentScale = this.targetScale; // Cap at target
+                }
+
+                // Fade in animation: gradually increase opacity
+                if (this.opacity < this.maxOpacity) {
+                    this.opacity += this.fadeSpeed;
+                    if (this.opacity > this.maxOpacity) this.opacity = this.maxOpacity;
+                }
+            }
+        }
+
+        // Stem class: manages drawing its path, leaves, and flowers
+        class Stem {
+            constructor(startPoint, control1, control2, endPoint, stemColor, petalColor, centerColor) {
+                this.start = startPoint;
+                this.c1 = control1;
+                this.c2 = control2;
+                this.end = endPoint;
+                this.stemColor = stemColor;
+                this.petalColor = petalColor;
+                this.centerColor = centerColor;
+                this.flowers = [];
+                this.leaves = [];
+                this.pathPoints = []; // Stores pre-calculated points along the Bezier curve
+                this.pathLength = 0; // Total length of the stem path
+                this.currentLength = 0; // How much of the stem is currently drawn
+                this.numSegments = 100; // Number of segments to approximate the Bezier curve
+            }
+
+            // Function to get a point on a cubic Bezier curve at parameter t (0 to 1)
+            getPointOnBezier(t) {
+                const x = (1 - t) ** 3 * this.start.x +
+                          3 * (1 - t) ** 2 * t * this.c1.x +
+                          3 * (1 - t) * t ** 2 * this.c2.x +
+                          t ** 3 * this.end.x;
+                const y = (1 - t) ** 3 * this.start.y +
+                          3 * (1 - t) ** 2 * t * this.c1.y +
+                          3 * (1 - t) * t ** 2 * this.c2.y +
+                          t ** 3 * this.end.y;
+                return { x, y };
+            }
+
+            // Pre-calculates points along the Bezier path and its total length
+            calculatePathPoints() {
+                this.pathPoints = [];
+                this.pathLength = 0;
+                let prevPoint = this.start;
+                this.pathPoints.push(prevPoint); // Add start point
+
+                for (let i = 1; i <= this.numSegments; i++) {
+                    const t = i / this.numSegments;
+                    const point = this.getPointOnBezier(t);
+                    this.pathPoints.push(point);
+                    this.pathLength += Math.sqrt(Math.pow(point.x - prevPoint.x, 2) + Math.pow(point.y - prevPoint.y, 2));
+                    prevPoint = point;
+                }
+            }
+
+            // Updates the stem's growth and manages its flowers and leaves
+            update(animationFactor) {
+                // Determine how much of the stem to draw based on animation progress
+                this.currentLength = this.pathLength * animationFactor;
+
+                // Add flowers as the stem grows
+                const flowersPerUnitLength = 0.01; // Density of flowers along the stem
+                const targetFlowersCount = Math.floor(this.currentLength * flowersPerUnitLength);
+
+                while (this.flowers.length < targetFlowersCount) {
+                    let accumulatedLength = 0;
+                    let flowerPoint = null;
+                    let segmentAngle = 0; // To determine flower rotation
+
+                    for (let i = 1; i < this.pathPoints.length; i++) {
+                        const segmentLength = Math.sqrt(Math.pow(this.pathPoints[i].x - this.pathPoints[i-1].x, 2) + Math.pow(this.pathPoints[i].y - this.pathPoints[i-1].y, 2));
+                        if (accumulatedLength + segmentLength >= (this.flowers.length + 1) / flowersPerUnitLength) {
+                            const remainingLength = (this.flowers.length + 1) / flowersPerUnitLength - accumulatedLength;
+                            const ratio = remainingLength / segmentLength;
+                            flowerPoint = {
+                                x: this.pathPoints[i-1].x + (this.pathPoints[i].x - this.pathPoints[i-1].x) * ratio,
+                                y: this.pathPoints[i-1].y + (this.pathPoints[i].y - this.pathPoints[i-1].y) * ratio
+                            };
+                            segmentAngle = Math.atan2(this.pathPoints[i].y - this.pathPoints[i-1].y, this.pathPoints[i].x - this.pathPoints[i-1].x);
+                            break;
+                        }
+                        accumulatedLength += segmentLength;
+                    }
+                    if (flowerPoint) {
+                        // Add some randomness to flower rotation
+                        const flowerRotation = segmentAngle + (Math.random() - 0.5) * Math.PI / 4;
+                        this.flowers.push(new Flower(flowerPoint.x, flowerPoint.y, 0, this.petalColor, this.centerColor, flowerRotation));
+                    } else {
+                        break;
+                    }
+                }
+
+                // Add leaves as the stem grows
+                const leavesPerUnitLength = 0.02; // Density of leaves
+                const targetLeavesCount = Math.floor(this.currentLength * leavesPerUnitLength);
+
+                while (this.leaves.length < targetLeavesCount) {
+                    let accumulatedLength = 0;
+                    let leafPoint = null;
+                    let segmentAngle = 0;
+
+                    for (let i = 1; i < this.pathPoints.length; i++) {
+                        const segmentLength = Math.sqrt(Math.pow(this.pathPoints[i].x - this.pathPoints[i-1].x, 2) + Math.pow(this.pathPoints[i].y - this.pathPoints[i-1].y, 2));
+                        if (accumulatedLength + segmentLength >= (this.leaves.length + 1) / leavesPerUnitLength) {
+                            const remainingLength = (this.leaves.length + 1) / leavesPerUnitLength - accumulatedLength;
+                            const ratio = remainingLength / segmentLength;
+                            leafPoint = {
+                                x: this.pathPoints[i-1].x + (this.pathPoints[i].x - this.pathPoints[i-1].x) * ratio,
+                                y: this.pathPoints[i-1].y + (this.pathPoints[i].y - this.pathPoints[i-1].y) * ratio
+                            };
+                            segmentAngle = Math.atan2(this.pathPoints[i].y - this.pathPoints[i-1].y, this.pathPoints[i].x - this.pathPoints[i-1].x);
+                            break;
+                        }
+                        accumulatedLength += segmentLength;
+                    }
+                    if (leafPoint) {
+                        // Alternate leaf direction slightly
+                        const leafRotation = segmentAngle + (this.leaves.length % 2 === 0 ? Math.PI / 2 : -Math.PI / 2);
+                        this.leaves.push({ x: leafPoint.x, y: leafPoint.y, rotation: leafRotation, opacity: 0, maxOpacity: 1, fadeSpeed: 0.05 });
+                    } else {
+                        break;
+                    }
+                }
+
+
+                // Update existing flowers and leaves
+                this.flowers.forEach(flower => flower.update());
+                this.leaves.forEach(leaf => {
+                    if (leaf.opacity < leaf.maxOpacity) {
+                        leaf.opacity += leaf.fadeSpeed;
+                        if (leaf.opacity > leaf.maxOpacity) leaf.opacity = leaf.maxOpacity;
+                    }
+                });
+            }
+
+            // Draws the stem, its leaves, and its flowers
+            draw() {
+                ctx.beginPath();
+                ctx.strokeStyle = this.stemColor;
+                ctx.lineWidth = 3; // Thinner stem thickness
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                let drawnLength = 0;
+                if (this.pathPoints.length > 0) {
+                    ctx.moveTo(this.pathPoints[0].x, this.pathPoints[0].y);
+                    for (let i = 1; i < this.pathPoints.length; i++) {
+                        const segmentLength = Math.sqrt(Math.pow(this.pathPoints[i].x - this.pathPoints[i-1].x, 2) + Math.pow(this.pathPoints[i].y - this.pathPoints[i-1].y, 2));
+                        if (drawnLength + segmentLength <= this.currentLength) {
+                            ctx.lineTo(this.pathPoints[i].x, this.pathPoints[i].y);
+                            drawnLength += segmentLength;
+                        } else {
+                            const remainingLength = this.currentLength - drawnLength;
+                            const ratio = remainingLength / segmentLength;
+                            const x = this.pathPoints[i-1].x + (this.pathPoints[i].x - this.pathPoints[i-1].x) * ratio;
+                            const y = this.pathPoints[i-1].y + (this.pathPoints[i].y - this.pathPoints[i-1].y) * ratio;
+                            ctx.lineTo(x, y);
+                            break;
+                        }
+                    }
+                }
+                ctx.stroke();
+
+                // Draw leaves
+                ctx.fillStyle = this.stemColor; // Leaves use stem color
+                this.leaves.forEach(leaf => {
+                    ctx.save();
+                    ctx.translate(leaf.x, leaf.y);
+                    ctx.rotate(leaf.rotation);
+                    ctx.globalAlpha = leaf.opacity;
+
+                    // Draw a simple elongated leaf shape
+                    const leafWidth = Math.min(width, height) * 0.008;
+                    const leafHeight = Math.min(width, height) * 0.025;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, leafHeight, leafWidth, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.globalAlpha = 1;
+                    ctx.restore();
+                });
+
+                // Draw flowers
+                this.flowers.forEach(flower => flower.draw());
+            }
+        }
+
+        // Define colors based on the reference image
+        const petalColor = '#f2a69b'; // Soft pink/peach
+        const centerColor = '#fcd34d'; // Yellow for flower center
+        const stemColor = '#4a9c8b'; // Teal/turquoise for stems and leaves
+
+        const stems = [];
+
+        function initStems() {
+            stems.length = 0; // Clear existing stems
+
+            const cx = width / 2;
+            const cy = height / 2;
+            const heartSize = Math.min(width, height) * 0.2; // Responsive heart size
+
+            // Define Bezier curve points for the heart shape
+            const p0 = { x: cx, y: cy + heartSize * 1.2 };
+            const pTop = { x: cx, y: cy - heartSize * 1.2 };
+
+            const c1Left = { x: cx - heartSize * 0.5, y: cy + heartSize * 0.8 };
+            const c2Left = { x: cx - heartSize * 1.5, y: cy - heartSize * 0.5 };
+
+            const c1Right = { x: cx + heartSize * 0.5, y: cy + heartSize * 0.8 };
+            const c2Right = { x: cx + heartSize * 1.5, y: cy - heartSize * 0.5 };
+
+            // Create the two stems
+            const stem1 = new Stem(p0, c1Left, c2Left, pTop, stemColor, petalColor, centerColor);
+            const stem2 = new Stem(p0, c1Right, c2Right, pTop, stemColor, petalColor, centerColor);
+
+            stem1.calculatePathPoints();
+            stem2.calculatePathPoints();
+
+            stems.push(stem1, stem2);
+        }
+
+        let animationStartTime = null;
+
+        function animate(currentTime) {
+            if (!animationStartTime) {
+                animationStartTime = currentTime;
+            }
+
+            const elapsedTime = currentTime - animationStartTime;
+            let animationFactor = Math.min(1, elapsedTime / animationDuration);
+
+            ctx.clearRect(0, 0, width, height);
+
+            stems.forEach(stem => {
+                stem.update(animationFactor);
+                stem.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize stems and start animation when the window loads
+        window.onload = function () {
+            initStems();
+            requestAnimationFrame(animate);
+        };
+    </script>
+</body>
+</html>
